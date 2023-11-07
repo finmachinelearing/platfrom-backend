@@ -9,7 +9,7 @@ from sqlalchemy import (
 )
 from sqlalchemy_utils import EmailType
 
-from app.db.database import Base
+from .database import Base
 
 
 class User(Base):
