@@ -26,3 +26,11 @@ class User(Base):
     email = Column(EmailType)
     is_superuser = Column(Boolean, default=False)
     joined_date = Column(DateTime, default=datetime.now)
+
+
+class TokenBlacklist(Base):
+
+    __tablename__ = 'token_blacklist'
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    token = Column(String)

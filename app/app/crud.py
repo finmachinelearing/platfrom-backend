@@ -1,3 +1,4 @@
+from typing import Dict
 from sqlalchemy.orm import Session
 
 from . import models
@@ -21,3 +22,31 @@ def create_user(db: Session, user: schemas.User):
     db.commit()
     db.refresh(db_user)
     return db_user
+
+
+def ban_token(db: Session, token: schemas.TokenBlacklist):
+    db_token = models.TokenBlacklist(
+        token=token.token
+    )
+    db.add(db_token)
+    db.commit()
+    db.refresh(db_token)
+
+
+def get_user_by_id(db: Session, user_id: int) -> models.User:
+    return db.query(models.User).filter(models.User.id == user_id).first()
+
+
+def update_user_in_db(
+        db: Session,
+        user_id: str,
+        fields_to_update: Dict[str, str]
+):
+    user = get_user_by_id(db=db, user_id=user_id)
+
+    for key, value in fields_to_update.items():
+        setattr(user, key, value)
+
+    db.add(user)
+    db.commit()
+    db.refresh(user)

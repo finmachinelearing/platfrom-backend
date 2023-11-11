@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 
 from .config import DEBUG
-from .routers import auth
+from .routers import auth, user
 from .database import engine
 from . import models
 
@@ -13,8 +13,4 @@ if not DEBUG:
     app = FastAPI(docs_url=None, redoc_url=None)
 
 app.include_router(router=auth.router)
-
-
-@app.get('/')
-async def root():
-    return {'message': 'Hello World'}
+app.include_router(router=user.router)
