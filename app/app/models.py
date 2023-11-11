@@ -5,9 +5,12 @@ from sqlalchemy import (
     String,
     Text,
     Boolean,
-    DateTime
+    DateTime,
+    ForeignKey,
+    JSON
 )
 from sqlalchemy_utils import EmailType
+from sqlalchemy.orm import relationship
 
 from .database import Base
 
@@ -34,3 +37,31 @@ class TokenBlacklist(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     token = Column(String)
+
+
+class Task(Base):
+
+    __tablename__ = 'task'
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    short_description = Column(Text)
+    description = Column(Text)
+    start_date = Column(DateTime)
+    end_date = Column(DateTime)
+    function_id = Column(Integer, ForeignKey('function.id'))
+    task_data = Column(String)
+    task_ans = Column(JSON)
+    ans_type = Column(String)
+    is_active = Column(Boolean, default=False)
+
+    function = relationship('Function', back_populates='task')
+
+
+class Function(Base):
+
+    __tablename__ = 'function'
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    name = Column(String)
+
+    order = relationship('Task', back_populates='function')
