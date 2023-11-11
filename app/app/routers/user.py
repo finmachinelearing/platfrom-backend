@@ -16,7 +16,10 @@ router = APIRouter(
 
 
 @router.get('/{user_id}', response_model=User)
-async def get_user(db: Session = Depends(get_db), user_id: int = Depends(get_current_user_id_or_403)):
+async def get_user(
+        db: Session = Depends(get_db),
+        user_id: int = Depends(get_current_user_id_or_403)
+):
     user = get_user_by_id(db=db, user_id=user_id)
 
     if not user:
@@ -26,7 +29,11 @@ async def get_user(db: Session = Depends(get_db), user_id: int = Depends(get_cur
 
 
 @router.patch('/{user_id}/update')
-async def update_user(request: Request, db: Session = Depends(get_db), user_id: int = Depends(get_current_user_id_or_403)):
+async def update_user(
+        request: Request,
+        db: Session = Depends(get_db),
+        user_id: int = Depends(get_current_user_id_or_403)
+):
     user = get_user_by_id(db=db, user_id=user_id)
 
     request_data = await request.json()

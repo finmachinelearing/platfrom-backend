@@ -1,9 +1,13 @@
+import json
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
 from .config import DATABASE_MAX_POOL, DATABASE_URL, DATABASE_MAX_OVERFLOW
-from .utils import dumps
+
+
+def dumps(d):
+    return json.dumps(d, ensure_ascii=False)
 
 
 engine = create_engine(

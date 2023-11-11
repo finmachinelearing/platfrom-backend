@@ -12,6 +12,9 @@ router = APIRouter(
 )
 
 
-@router.get('/', response_model=Function)
-async def get_functions(db: Session = Depends(get_db), _: bool = Depends(get_superadmin_or_404)):
+@router.get('/', response_model=list[Function])
+async def get_functions(
+        db: Session = Depends(get_db),
+        _: bool = Depends(get_superadmin_or_404)
+):
     return get_all_functions(db=db)

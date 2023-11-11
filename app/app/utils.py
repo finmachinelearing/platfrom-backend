@@ -1,4 +1,3 @@
-import json
 from datetime import datetime, timedelta
 from typing import Any, Union
 from jose import jwt
@@ -15,10 +14,6 @@ from .config import (
     REFRESH_TOKEN_EXPIRE_MINUTES,
     JWT_REFRESH_SECRET_KEY
 )
-
-
-def dumps(d):
-    return json.dumps(d, ensure_ascii=False)
 
 
 def create_access_token(subject: Union[str, Any], expires_delta: int = None) -> str:
@@ -100,3 +95,8 @@ def get_superadmin_or_404(request: Request, db: Session = Depends(get_db)) -> bo
         return True
 
     raise HTTPException(status_code=404, detail='Not Found')
+
+
+def get_user_id_from_refresh_token(refresh_token: str) -> int:
+    claims = jwt.decode(refresh_token, JWT_REFRESH_SECRET_KEY)
+    return claims.get('user_id')

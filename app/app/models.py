@@ -64,4 +64,4 @@ class Function(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String)
 
-    order = relationship('Task', back_populates='function')
+    task = relationship('Task', back_populates='function')

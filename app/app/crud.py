@@ -1,5 +1,6 @@
-from typing import Dict
+from typing import Dict, Any
 from sqlalchemy.orm import Session
+from dateutil.parser import parse as parse_date
 
 from . import models
 from . import schemas
@@ -54,3 +55,35 @@ def update_user_in_db(
 
 def get_all_functions(db: Session):
     return db.query(models.Function).all()
+
+
+def get_token(db: Session, token: str):
+    return db.query(models.TokenBlacklist).filter(models.TokenBlacklist.token == token).first()
+
+
+def create_task_in_db(db: Session, data: Dict[str, Any]):
+    db_task = models.Task(
+        short_description=data['short_description'],
+        description=data['description'],
+        start_date=parse_date(data['start_date']),
+        end_date=parse_date(data['end_date']),
+        function_id=data['function_id'],
+        task_ans=data['task_ans'],
+        ans_type=data['ans_type']
+    )
+    db.add(db_task)
+    db.commit()
+    db.refresh(db_task)
+    return db_task
+
+
+def get_task(db: Session, task_id: int):
+    return db.query(models.Task).filter(models.Task.id == task_id).first()
+
+
+def add_task_data_in_db(db: Session, task_id: int, uid: str):
+    task = get_task(db=db, task_id=task_id)
+    task.task_data = uid
+    db.add(task)
+    db.commit()
+    db.refresh(task)
