@@ -20,7 +20,7 @@ class User(Base):
     provider_id = Column(String, index=True)
     name = Column(String)
     surname = Column(String)
-    about = Column(Text)
+    about = Column(Text, nullable=True, default=None)
     avatar_url = Column(String)
     is_active = Column(Boolean, default=True)
     email = Column(EmailType)
