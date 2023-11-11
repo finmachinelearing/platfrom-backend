@@ -50,3 +50,7 @@ def update_user_in_db(
     db.add(user)
     db.commit()
     db.refresh(user)
+
+
+def get_all_functions(db: Session):
+    return db.query(models.Function).all()

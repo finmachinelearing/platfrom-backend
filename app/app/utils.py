@@ -2,9 +2,12 @@ import json
 from datetime import datetime, timedelta
 from typing import Any, Union
 from jose import jwt
-from fastapi import HTTPException, Request
+from fastapi import HTTPException, Request, Depends
 from jose.exceptions import ExpiredSignatureError, JWTError
+from sqlalchemy.orm import Session
 
+from .dependencies import get_db
+from .crud import get_user_by_id
 from .config import (
     ACCESS_TOKEN_EXPIRE_MINUTES,
     JWT_SECRET_KEY,
@@ -77,3 +80,23 @@ def get_refresh_token_or_403(request: Request) -> str:
         raise HTTPException(status_code=403, detail='Unauthorized')
 
     return refresh_token
+
+
+def get_superadmin_or_404(request: Request, db: Session = Depends(get_db)) -> bool:
+    access_token = request.headers.get('authorization')
+
+    if not access_token:
+        raise HTTPException(status_code=404, detail='Not Found')
+
+    try:
+        claims = jwt.decode(access_token.split()[1], JWT_SECRET_KEY)
+        user_id = claims.get('user_id')
+    except (JWTError, ExpiredSignatureError):
+        raise HTTPException(status_code=404, detail='Not Found')
+
+    user = get_user_by_id(db=db, user_id=user_id)
+
+    if user.is_superuser:
+        return True
+
+    raise HTTPException(status_code=404, detail='Not Found')

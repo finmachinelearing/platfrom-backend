@@ -25,3 +25,8 @@ class EditUser(BaseModel):
     name: Optional[str] = None
     surname: Optional[str] = None
     about: Optional[str] = None
+
+
+class Function(BaseModel):
+
+    name: str

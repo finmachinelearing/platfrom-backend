@@ -49,7 +49,7 @@ class Task(Base):
     start_date = Column(DateTime)
     end_date = Column(DateTime)
     function_id = Column(Integer, ForeignKey('function.id'))
-    task_data = Column(String)
+    task_data = Column(String, nullable=True, default=None)
     task_ans = Column(JSON)
     ans_type = Column(String)
     is_active = Column(Boolean, default=False)
