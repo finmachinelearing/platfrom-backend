@@ -1,4 +1,3 @@
-import datetime
 from typing import Optional, Dict
 from pydantic import BaseModel
 
@@ -35,6 +34,7 @@ class Function(BaseModel):
 
 class CreateTask(BaseModel):
 
+    name: str
     short_description: str
     description: str
     start_date: str
@@ -44,15 +44,14 @@ class CreateTask(BaseModel):
     ans_type: str
 
 
-class Task(BaseModel):
+class EditTask(BaseModel):
 
-    id: int
-    short_description: str
-    description: str
-    start_date: datetime.datetime
-    end_date: datetime.datetime
-    function_id: int
-    task_data: str
-    task_ans: Dict[str, str]
-    ans_type: str
-    is_active: bool
+    name: Optional[str] = None
+    short_description: Optional[str] = None
+    description: Optional[str] = None
+    start_date: Optional[str] = None
+    end_date: Optional[str] = None
+    function_id: Optional[int] = None
+    task_ans: Optional[Dict[str, str]] = None
+    ans_type: Optional[str] = None
+    is_active: Optional[bool] = None

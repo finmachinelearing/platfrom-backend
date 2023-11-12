@@ -36,6 +36,9 @@ async def update_user(
 ):
     user = get_user_by_id(db=db, user_id=user_id)
 
+    if not user:
+        raise HTTPException(detail='Not found', status_code=404)
+
     request_data = await request.json()
     try:
         validated_request_data = EditUser(**request_data)
@@ -43,10 +46,6 @@ async def update_user(
         raise HTTPException(detail='Request data is not valid', status_code=400)
 
     fields_to_update = validated_request_data.model_dump(exclude_unset=True)
-
     update_user_in_db(db=db, user_id=user_id, fields_to_update=fields_to_update)
-
-    if not user:
-        raise HTTPException(detail='Not found', status_code=404)
 
     return JSONResponse(content='Updated', status_code=200)

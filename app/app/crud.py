@@ -1,6 +1,8 @@
 from typing import Dict, Any
+from sqlalchemy import asc
 from sqlalchemy.orm import Session
 from dateutil.parser import parse as parse_date
+from typing import Optional
 
 from . import models
 from . import schemas
@@ -63,6 +65,7 @@ def get_token(db: Session, token: str):
 
 def create_task_in_db(db: Session, data: Dict[str, Any]):
     db_task = models.Task(
+        name=data['name'],
         short_description=data['short_description'],
         description=data['description'],
         start_date=parse_date(data['start_date']),
@@ -77,13 +80,68 @@ def create_task_in_db(db: Session, data: Dict[str, Any]):
     return db_task
 
 
-def get_task(db: Session, task_id: int):
+def get_task_from_db(db: Session, task_id: int):
     return db.query(models.Task).filter(models.Task.id == task_id).first()
 
 
 def add_task_data_in_db(db: Session, task_id: int, uid: str):
-    task = get_task(db=db, task_id=task_id)
+    task = get_task_from_db(db=db, task_id=task_id)
     task.task_data = uid
+    db.add(task)
+    db.commit()
+    db.refresh(task)
+
+
+def update_task_in_db(
+        db: Session,
+        task_id: int,
+        fields_to_update: Dict[str, str]
+):
+    task = get_task_from_db(db=db, task_id=task_id)
+
+    for key, value in fields_to_update.items():
+        setattr(task, key, value)
+
+    db.add(task)
+    db.commit()
+    db.refresh(task)
+
+
+def update_task_data_in_db(
+        db: Session,
+        task_id: int,
+        uid: str
+):
+    task = get_task_from_db(db=db, task_id=task_id)
+    task.task_data = uid
+    db.add(task)
+    db.commit()
+    db.refresh(task)
+
+
+def search_tasks_by_name_in_db(
+        db: Session,
+        name: Optional[str] = None,
+        end_date: Optional[str] = None
+):
+    tasks = db.query(models.Task)
+
+    if name:
+        tasks = tasks.filter(models.Task.name.contains(name))
+
+    if end_date:
+        tasks = tasks.filter(models.Task.end_date <= parse_date(end_date))
+
+    return tasks.filter(
+        models.Task.is_active.is_(True)
+    ).order_by(
+        asc(models.Task.end_date)
+    ).all()
+
+
+def change_task_status_in_db(db: Session, task_id: int):
+    task = get_task_from_db(db=db, task_id=task_id)
+    task.is_active = not task.is_active
     db.add(task)
     db.commit()
     db.refresh(task)

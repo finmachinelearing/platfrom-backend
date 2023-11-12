@@ -88,9 +88,9 @@ async def google_sso_callback(request: Request, db: Session = Depends(get_db)):
 
 @router.post('/logout')
 async def logout(
-    db: Session = Depends(get_db),
-    _: int = Depends(get_current_user_id_or_403),
-    refresh_token: str = Depends(get_refresh_token_or_403)
+        db: Session = Depends(get_db),
+        _: int = Depends(get_current_user_id_or_403),
+        refresh_token: str = Depends(get_refresh_token_or_403)
 ):
     ban_token(
         db=db,
@@ -103,8 +103,8 @@ async def logout(
 
 @router.post('/refresh')
 async def refresh(
-    db: Session = Depends(get_db),
-    refresh_token: str = Depends(get_refresh_token_or_403)
+        db: Session = Depends(get_db),
+        refresh_token: str = Depends(get_refresh_token_or_403)
 ):
     db_token = get_token(db=db, token=refresh_token)
     if db_token:
