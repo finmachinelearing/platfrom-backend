@@ -36,9 +36,15 @@ async def search_tasks(
         db: Session = Depends(get_db),
         _: int = Depends(get_current_user_id_or_403),
         name: Optional[str] = None,
-        end_date: Optional[str] = None
+        end_date: Optional[str] = None,
+        tag: Optional[str] = None
 ):
-    tasks = search_tasks_by_name_in_db(db=db, name=name, end_date=end_date)
+    tasks = search_tasks_by_name_in_db(
+        db=db,
+        name=name,
+        end_date=end_date,
+        tag=tag
+    )
     return tasks
 
 

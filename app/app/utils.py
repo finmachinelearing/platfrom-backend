@@ -4,6 +4,7 @@ from jose import jwt
 from fastapi import HTTPException, Request, Depends
 from jose.exceptions import ExpiredSignatureError, JWTError
 from sqlalchemy.orm import Session
+from csvvalidator import RecordError
 
 from .dependencies import get_db
 from .crud import get_user_by_id
@@ -100,3 +101,11 @@ def get_superadmin_or_404(request: Request, db: Session = Depends(get_db)) -> bo
 def get_user_id_from_refresh_token(refresh_token: str) -> int:
     claims = jwt.decode(refresh_token, JWT_REFRESH_SECRET_KEY)
     return claims.get('user_id')
+
+
+def check_csv_records(record):
+    id = record['id']
+    result = record['result']
+
+    if not id or not result:
+        raise RecordError('EX8', f'Invalid record: {record}')

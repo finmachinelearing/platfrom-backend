@@ -7,10 +7,12 @@ from sqlalchemy import (
     Boolean,
     DateTime,
     ForeignKey,
-    JSON
+    JSON,
+    Float
 )
 from sqlalchemy_utils import EmailType
 from sqlalchemy.orm import relationship
+from sqlalchemy.dialects.postgresql import ARRAY
 
 from .database import Base
 
@@ -29,6 +31,8 @@ class User(Base):
     email = Column(EmailType)
     is_superuser = Column(Boolean, default=False)
     joined_date = Column(DateTime, default=datetime.now)
+
+    answer = relationship('Answer', back_populates='user')
 
 
 class TokenBlacklist(Base):
@@ -53,9 +57,11 @@ class Task(Base):
     task_data = Column(String, nullable=True, default=None)
     task_ans = Column(JSON)
     ans_type = Column(String)
+    tags = Column(ARRAY(String))
     is_active = Column(Boolean, default=False)
 
     function = relationship('Function', back_populates='task')
+    answer = relationship('Answer', back_populates='task')
 
 
 class Function(Base):
@@ -66,3 +72,19 @@ class Function(Base):
     name = Column(String)
 
     task = relationship('Task', back_populates='function')
+
+
+class Answer(Base):
+
+    __tablename__ = 'answer'
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    task_id = Column(Integer, ForeignKey('task.id'))
+    user_id = Column(Integer, ForeignKey('user.id'))
+    task_ans = Column(JSON)
+    score = Column(Float, nullable=True, default=None)
+    added_at = Column(DateTime, default=datetime.now)
+    is_active = Column(Boolean, default=True)
+
+    task = relationship('Task', back_populates='answer')
+    user = relationship('User', back_populates='answer')

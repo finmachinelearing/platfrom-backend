@@ -1,4 +1,4 @@
-from typing import Optional, Dict
+from typing import Optional, Dict, List
 from pydantic import BaseModel
 
 
@@ -42,6 +42,7 @@ class CreateTask(BaseModel):
     function_id: int
     task_ans: Dict[str, str]
     ans_type: str
+    tags: List[str]
 
 
 class EditTask(BaseModel):
@@ -55,3 +56,4 @@ class EditTask(BaseModel):
     task_ans: Optional[Dict[str, str]] = None
     ans_type: Optional[str] = None
     is_active: Optional[bool] = None
+    tags: Optional[List[str]] = None

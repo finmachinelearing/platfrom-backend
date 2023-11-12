@@ -1,11 +1,12 @@
 from typing import Dict, Any
-from sqlalchemy import asc
+from sqlalchemy import asc, text, desc
 from sqlalchemy.orm import Session
 from dateutil.parser import parse as parse_date
 from typing import Optional
 
 from . import models
 from . import schemas
+from app.app.sql_const import SCOREBOARD_SQL
 
 
 def get_user(db: Session, provider_id: str):
@@ -72,7 +73,8 @@ def create_task_in_db(db: Session, data: Dict[str, Any]):
         end_date=parse_date(data['end_date']),
         function_id=data['function_id'],
         task_ans=data['task_ans'],
-        ans_type=data['ans_type']
+        ans_type=data['ans_type'],
+        tags=data['tags']
     )
     db.add(db_task)
     db.commit()
@@ -122,7 +124,8 @@ def update_task_data_in_db(
 def search_tasks_by_name_in_db(
         db: Session,
         name: Optional[str] = None,
-        end_date: Optional[str] = None
+        end_date: Optional[str] = None,
+        tag: Optional[str] = None
 ):
     tasks = db.query(models.Task)
 
@@ -131,6 +134,9 @@ def search_tasks_by_name_in_db(
 
     if end_date:
         tasks = tasks.filter(models.Task.end_date <= parse_date(end_date))
+
+    if tag:
+        tasks = tasks.filter(models.Task.tags.contains([tag]))
 
     return tasks.filter(
         models.Task.is_active.is_(True)
@@ -145,3 +151,43 @@ def change_task_status_in_db(db: Session, task_id: int):
     db.add(task)
     db.commit()
     db.refresh(task)
+
+
+def create_answer_in_db(
+        db: Session,
+        task_id: int,
+        user_id: int,
+        task_ans: Dict
+):
+    db_answer = models.Answer(
+        task_id=task_id,
+        user_id=user_id,
+        task_ans=task_ans
+    )
+    db.add(db_answer)
+    db.commit()
+    db.refresh(db_answer)
+    return db_answer
+
+
+def get_all_answers_for_task_in_db(db: Session, task_id: int):
+    with db.connection() as conn:
+        result = conn.execute(text(SCOREBOARD_SQL % {'task_id': task_id}))
+        return result.all()
+
+
+def get_user_answers_for_task_in_db(
+        db: Session,
+        task_id: int,
+        user_id: int
+):
+    return db.query(
+        models.Answer
+    ).filter(
+        models.Answer.task_id == task_id,
+        models.Answer.user_id == user_id,
+        models.Answer.score.is_not(None),
+        models.Answer.is_active.is_(True)
+    ).order_by(
+        desc(models.Answer.added_at)
+    ).all()

@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 
 from .config import DEBUG
-from .routers import auth, user, functions, tasks
+from .routers import auth, user, functions, tasks, answers
 from .database import engine
 from . import models
 
@@ -16,3 +16,4 @@ app.include_router(router=auth.router)
 app.include_router(router=user.router)
 app.include_router(router=functions.router)
 app.include_router(router=tasks.router)
+app.include_router(router=answers.router)
