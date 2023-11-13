@@ -1,3 +1,4 @@
+[![Docker Image CI](https://github.com/tncoding/platfrom-backend/actions/workflows/main.yml/badge.svg)](https://github.com/tncoding/platfrom-backend/actions/workflows/main.yml)
 # Running locally
 
 ```
