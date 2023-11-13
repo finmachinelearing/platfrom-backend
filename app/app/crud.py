@@ -191,3 +191,15 @@ def get_user_answers_for_task_in_db(
     ).order_by(
         desc(models.Answer.added_at)
     ).all()
+
+
+def update_score_in_db(
+        db: Session,
+        answer_id: int,
+        score: float
+):
+    db_answer = db.query(models.Answer).filter(models.Answer.id == answer_id).first()
+    db_answer.score = score
+    db.add(db_answer)
+    db.commit()
+    db.refresh(db_answer)

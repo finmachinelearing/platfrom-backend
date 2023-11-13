@@ -1,5 +1,6 @@
+import numpy as np
 from datetime import datetime, timedelta
-from typing import Any, Union
+from typing import Any, Union, List
 from jose import jwt
 from fastapi import HTTPException, Request, Depends
 from jose.exceptions import ExpiredSignatureError, JWTError
@@ -109,3 +110,40 @@ def check_csv_records(record):
 
     if not id or not result:
         raise RecordError('EX8', f'Invalid record: {record}')
+
+
+class Metric:
+
+    def __init__(self, y_real: List, y_predicted: List) -> None:
+        self.y_real = np.array(y_real)
+        self.y_predicted = np.array(y_predicted)
+
+    def calc(self) -> float:
+        pass
+
+
+class MSE(Metric):
+
+    def __init__(self, y_real: List, y_predicted: List) -> None:
+        super().__init__(y_real, y_predicted)
+
+    def calc(self) -> float:
+        return 1 / len(self.y_real) * sum((self.y_real - self.y_predicted) ** 2)
+
+
+class MAPE(Metric):
+
+    def __init__(self, y_real: List, y_predicted: List) -> None:
+        super().__init__(y_real, y_predicted)
+
+    def calc(self) -> float:
+        return 1 / len(self.y_real) * sum((self.y_real - self.y_predicted) / self.y_real)
+
+
+class MAE(Metric):
+
+    def __init__(self, y_real: List, y_predicted: List) -> None:
+        super().__init__(y_real, y_predicted)
+
+    def calc(self) -> float:
+        return 1 / len(self.y_real) * sum(abs(self.y_real - self.y_predicted))

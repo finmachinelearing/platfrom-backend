@@ -4,18 +4,28 @@ from fastapi import (
     APIRouter,
     HTTPException,
     Depends,
-    UploadFile
+    UploadFile,
+    BackgroundTasks
 )
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 from csvvalidator import CSVValidator
 
+from app.app.models import Answer
 from app.app.dependencies import get_db
-from app.app.utils import get_current_user_id_or_403, check_csv_records
+from app.app.utils import (
+    get_current_user_id_or_403,
+    check_csv_records,
+    MAE,
+    MAPE,
+    MSE
+)
 from app.app.crud import (
     create_answer_in_db,
     get_all_answers_for_task_in_db,
-    get_user_answers_for_task_in_db
+    get_user_answers_for_task_in_db,
+    get_task_from_db,
+    update_score_in_db
 )
 
 router = APIRouter(
@@ -35,13 +45,34 @@ validator.add_record_length_check('EX2', 'unexpected record lenght')
 validator.add_record_check(check_csv_records)
 
 
+def calculate_score(db: Session, answer: Answer, task_id: int) -> None:
+    task = get_task_from_db(db=db, task_id=task_id)
+
+    function_name = task.function.name
+    correct_answers = [float(answer) for answer in task.task_ans.values()]
+    user_answers = [float(answer) for answer in answer.task_ans.values()]
+
+    if function_name == 'MSE':
+        function = MSE(y_real=correct_answers, y_predicted=user_answers)
+    elif function_name == 'MAPE':
+        function = MAPE(y_real=correct_answers, y_predicted=user_answers)
+    elif function_name == 'MAE':
+        function = MAE(y_real=correct_answers, y_predicted=user_answers)
+
+    score = function.calc()
+
+    update_score_in_db(db=db, answer_id=answer.id, score=score)
+
+
 @router.post('/{task_id}')
 async def create_answer(
         file: UploadFile,
         task_id: int,
+        background_tasks: BackgroundTasks,
         db: Session = Depends(get_db),
         user_id: int = Depends(get_current_user_id_or_403),
 ):
+    # TODO: add csv len validate
     try:
         csv_reader = csv.reader(StringIO(file.file.read().decode()), delimiter=',')
         csv_data = list(csv_reader)
@@ -66,7 +97,7 @@ async def create_answer(
         task_ans=task_ans
     )
 
-    # TODO: create background task for calculating score
+    background_tasks.add_task(calculate_score, db=db, answer=answer, task_id=task_id)
 
     return JSONResponse(
         content={
