@@ -12,5 +12,5 @@ jobs:
           host: ${{ secrets.PROD_IP }}
           username: ${{ secrets.PROD_USERNAME }}
           password: ${{ secrets.PROD_PASSWORD }}
-          script: sudo docker compose -f /home/tiazz0/faml/docker-compose.yaml pull && sudo docker compose -f /home/tiazz0/faml/docker-compose.yaml up -d
+          script: docker compose -f /home/tiazz0/faml/docker-compose.yaml pull && sudo docker compose -f /home/tiazz0/faml/docker-compose.yaml up -d
       
