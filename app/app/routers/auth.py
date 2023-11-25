@@ -58,12 +58,21 @@ async def google_sso_callback(request: Request, db: Session = Depends(get_db)):
     db_user = get_user(db=db, provider_id=provider_id)
 
     if not db_user:
+        name = user.first_name
+        surname = user.last_name
+
+        if not name:
+            name = ''
+
+        if not surname:
+            surname = ''
+
         db_user = create_user(
             db=db,
             user=User(
                 provider_id=provider_id,
-                name=user.first_name,
-                surname=user.last_name,
+                name=name,
+                surname=surname,
                 avatar_url=user.picture,
                 email=user.email
             )

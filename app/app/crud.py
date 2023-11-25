@@ -6,7 +6,7 @@ from typing import Optional
 
 from . import models
 from . import schemas
-from app.app.sql_const import SCOREBOARD_SQL
+from app.app.sql_const import SCOREBOARD_SQL, DISTINCT_TASKS_SQL
 
 
 def get_user(db: Session, provider_id: str):
@@ -203,3 +203,12 @@ def update_score_in_db(
     db.add(db_answer)
     db.commit()
     db.refresh(db_answer)
+
+
+def get_all_tasks_for_user_id_db(db: Session, user_id: int):
+    with db.connection() as conn:
+        tasks_ids = conn.execute(text(DISTINCT_TASKS_SQL % {'user_id': user_id})).all()
+        return [
+            get_task_from_db(db=db, task_id=task_row[0])
+            for task_row in tasks_ids
+        ]

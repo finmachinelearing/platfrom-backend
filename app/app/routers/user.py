@@ -6,7 +6,7 @@ from pydantic import ValidationError
 
 from app.app.dependencies import get_db
 from app.app.utils import get_current_user_id_or_403
-from app.app.schemas import User, EditUser
+from app.app.schemas import EditUser, ReturnUser
 from app.app.crud import get_user_by_id, update_user_in_db
 
 router = APIRouter(
@@ -15,10 +15,11 @@ router = APIRouter(
 )
 
 
-@router.get('/{user_id}', response_model=User)
+@router.get('/{user_id}', response_model=ReturnUser)
 async def get_user(
+        user_id: int,
         db: Session = Depends(get_db),
-        user_id: int = Depends(get_current_user_id_or_403)
+        _: int = Depends(get_current_user_id_or_403)
 ):
     user = get_user_by_id(db=db, user_id=user_id)
 

@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Optional, Dict, List
 from pydantic import BaseModel
 
@@ -13,6 +14,11 @@ class User(BaseModel):
 
     class Config:
         orm_mode = True
+
+
+class ReturnUser(User):
+
+    joined_date: datetime
 
 
 class TokenBlacklist(BaseModel):

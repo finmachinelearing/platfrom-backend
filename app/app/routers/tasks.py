@@ -21,7 +21,9 @@ from app.app.crud import (
     update_task_in_db,
     update_task_data_in_db,
     search_tasks_by_name_in_db,
-    change_task_status_in_db
+    change_task_status_in_db,
+    get_user_by_id,
+    get_all_tasks_for_user_id_db
 )
 from app.app.config import S3_BUCKET_NAME
 
@@ -165,3 +167,19 @@ async def update_task_data(
         raise HTTPException(status_code=500, detail='Error on uploading the file')
     finally:
         file.file.close()
+
+
+@router.get('/participant/{user_id}')
+async def get_all_tasks_for_user(
+        user_id: int,
+        db: Session = Depends(get_db),
+        _: int = Depends(get_current_user_id_or_403)
+):
+    user = get_user_by_id(db=db, user_id=user_id)
+
+    if not user:
+        raise HTTPException(detail='User not found', status_code=404)
+
+    tasks = get_all_tasks_for_user_id_db(db=db, user_id=user_id)
+
+    return tasks
