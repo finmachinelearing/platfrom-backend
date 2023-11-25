@@ -72,7 +72,11 @@ async def create_answer(
         db: Session = Depends(get_db),
         user_id: int = Depends(get_current_user_id_or_403),
 ):
-    # TODO: add csv len validate
+    task = get_task_from_db(db=db, task_id=task_id)
+
+    if not task:
+        raise HTTPException(detail='Task not found', status_code=404)
+
     try:
         csv_reader = csv.reader(StringIO(file.file.read().decode()), delimiter=',')
         csv_data = list(csv_reader)
@@ -88,7 +92,10 @@ async def create_answer(
 
     for row in csv_data[1:]:
         id, result = row
-        task_ans[id] = result
+        task_ans[id] = result.strip()
+
+    if len(task_ans) != len(task.task_ans):
+        raise HTTPException(detail='CSV len is not correct', status_code=400)
 
     answer = create_answer_in_db(
         db=db,
