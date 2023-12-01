@@ -63,3 +63,18 @@ class EditTask(BaseModel):
     ans_type: Optional[str] = None
     is_active: Optional[bool] = None
     tags: Optional[List[str]] = None
+
+
+class ReturnTask(BaseModel):
+
+    id: int
+    name: str
+    short_description: str
+    description: str
+    start_date: datetime
+    end_date: datetime
+    function_id: int
+    task_data: Optional[str]
+    ans_type: str
+    tags: Optional[List[str]]
+    is_active: bool

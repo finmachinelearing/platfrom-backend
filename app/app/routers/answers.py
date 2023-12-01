@@ -124,13 +124,14 @@ async def get_all_answers_for_task(
     result = []
 
     for answer in answers:
-        score, user_id = answer
+        score, user_id, surname = answer
         result.append({
             'user_id': user_id,
+            'surname': surname,
             'score': score
         })
 
-    return JSONResponse(content=result, status_code=200)
+    return JSONResponse(content=sorted(result, key=lambda x: x['score']), status_code=200)
 
 
 @router.get('/{task_id}')

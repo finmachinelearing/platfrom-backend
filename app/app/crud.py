@@ -1,5 +1,5 @@
 from typing import Dict, Any
-from sqlalchemy import asc, text, desc
+from sqlalchemy import text, desc
 from sqlalchemy.orm import Session
 from dateutil.parser import parse as parse_date
 from typing import Optional
@@ -138,10 +138,9 @@ def search_tasks_by_name_in_db(
     if tag:
         tasks = tasks.filter(models.Task.tags.contains([tag]))
 
-    return tasks.filter(
-        models.Task.is_active.is_(True)
-    ).order_by(
-        asc(models.Task.end_date)
+    return tasks.order_by(
+        desc(models.Task.is_active.is_(True)),
+        desc(models.Task.end_date)
     ).all()
 
 

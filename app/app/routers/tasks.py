@@ -12,8 +12,8 @@ from pydantic import ValidationError
 from typing import Optional
 
 from app.app.dependencies import get_db, get_s3
-from app.app.schemas import CreateTask, EditTask
-from app.app.utils import get_superadmin_or_404, get_current_user_id_or_403
+from app.app.schemas import CreateTask, EditTask, ReturnTask
+from app.app.utils import get_superadmin_or_404
 from app.app.crud import (
     create_task_in_db,
     add_task_data_in_db,
@@ -33,10 +33,9 @@ router = APIRouter(
 )
 
 
-@router.get('/search')
+@router.get('/search', response_model=list[ReturnTask])
 async def search_tasks(
         db: Session = Depends(get_db),
-        _: int = Depends(get_current_user_id_or_403),
         name: Optional[str] = None,
         end_date: Optional[str] = None,
         tag: Optional[str] = None
@@ -110,11 +109,10 @@ async def add_task_data(
         file.file.close()
 
 
-@router.get('/{task_id}')
+@router.get('/{task_id}', response_model=ReturnTask)
 async def get_task(
         task_id: int,
-        db: Session = Depends(get_db),
-        _: int = Depends(get_current_user_id_or_403)
+        db: Session = Depends(get_db)
 ):
     task = get_task_from_db(db=db, task_id=task_id)
 
@@ -169,11 +167,10 @@ async def update_task_data(
         file.file.close()
 
 
-@router.get('/participant/{user_id}')
+@router.get('/participant/{user_id}', response_model=list[ReturnTask])
 async def get_all_tasks_for_user(
         user_id: int,
-        db: Session = Depends(get_db),
-        _: int = Depends(get_current_user_id_or_403)
+        db: Session = Depends(get_db)
 ):
     user = get_user_by_id(db=db, user_id=user_id)
 
