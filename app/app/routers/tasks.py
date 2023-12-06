@@ -1,3 +1,5 @@
+import csv
+from io import StringIO
 import uuid
 from fastapi import (
     APIRouter,
@@ -23,7 +25,9 @@ from app.app.crud import (
     search_tasks_by_name_in_db,
     change_task_status_in_db,
     get_user_by_id,
-    get_all_tasks_for_user_id_db
+    get_all_tasks_for_user_id_db,
+    add_task_answer_in_db,
+    update_task_answer_in_db
 )
 from app.app.config import S3_BUCKET_NAME
 
@@ -109,6 +113,34 @@ async def add_task_data(
         file.file.close()
 
 
+@router.post('/{task_id}/add_answer')
+async def add_task_answer(
+        file: UploadFile,
+        task_id: int,
+        db: Session = Depends(get_db),
+        _: bool = Depends(get_superadmin_or_404),
+):
+    task = get_task_from_db(db=db, task_id=task_id)
+
+    if not task:
+        raise HTTPException(detail='Task not found', status_code=404)
+
+    try:
+        csv_reader = csv.reader(StringIO(file.file.read().decode()), delimiter=',')
+        csv_data = list(csv_reader)
+    except Exception:
+        raise HTTPException(detail='CSV is not correct', status_code=400)
+
+    task_ans = {}
+
+    for row in csv_data[1:]:
+        id, result = row
+        task_ans[id] = result.strip()
+
+    add_task_answer_in_db(db=db, task_id=task_id, task_ans=task_ans)
+    return JSONResponse(content={'result': 'OK'}, status_code=201)
+
+
 @router.get('/{task_id}', response_model=ReturnTask)
 async def get_task(
         task_id: int,
@@ -165,6 +197,34 @@ async def update_task_data(
         raise HTTPException(status_code=500, detail='Error on uploading the file')
     finally:
         file.file.close()
+
+
+@router.patch('/{task_id}/update_answer')
+async def update_task_answer(
+        file: UploadFile,
+        task_id: int,
+        db: Session = Depends(get_db),
+        _: bool = Depends(get_superadmin_or_404),
+):
+    task = get_task_from_db(db=db, task_id=task_id)
+
+    if not task:
+        raise HTTPException(detail='Task not found', status_code=404)
+
+    try:
+        csv_reader = csv.reader(StringIO(file.file.read().decode()), delimiter=',')
+        csv_data = list(csv_reader)
+    except Exception:
+        raise HTTPException(detail='CSV is not correct', status_code=400)
+
+    task_ans = {}
+
+    for row in csv_data[1:]:
+        id, result = row
+        task_ans[id] = result.strip()
+
+    update_task_answer_in_db(db=db, task_id=task_id, task_ans=task_ans)
+    return JSONResponse(content='Updated', status_code=200)
 
 
 @router.get('/participant/{user_id}', response_model=list[ReturnTask])

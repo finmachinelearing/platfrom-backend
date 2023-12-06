@@ -132,7 +132,6 @@ async def create_answer(
 async def get_all_answers_for_task(
         task_id: int,
         db: Session = Depends(get_db),
-        _: int = Depends(get_current_user_id_or_403)
 ):
     answers = get_all_answers_for_task_in_db(db=db, task_id=task_id)
     result = []

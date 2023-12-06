@@ -46,7 +46,6 @@ class CreateTask(BaseModel):
     start_date: str
     end_date: str
     function_id: int
-    task_ans: Dict[str, str]
     ans_type: str
     tags: List[str]
 
@@ -59,7 +58,6 @@ class EditTask(BaseModel):
     start_date: Optional[str] = None
     end_date: Optional[str] = None
     function_id: Optional[int] = None
-    task_ans: Optional[Dict[str, str]] = None
     ans_type: Optional[str] = None
     is_active: Optional[bool] = None
     tags: Optional[List[str]] = None

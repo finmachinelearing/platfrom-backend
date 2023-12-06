@@ -72,7 +72,6 @@ def create_task_in_db(db: Session, data: Dict[str, Any]):
         start_date=parse_date(data['start_date']),
         end_date=parse_date(data['end_date']),
         function_id=data['function_id'],
-        task_ans=data['task_ans'],
         ans_type=data['ans_type'],
         tags=data['tags']
     )
@@ -211,3 +210,19 @@ def get_all_tasks_for_user_id_db(db: Session, user_id: int):
             get_task_from_db(db=db, task_id=task_row[0])
             for task_row in tasks_ids
         ]
+
+
+def add_task_answer_in_db(db: Session, task_id: int, task_ans: dict):
+    task = get_task_from_db(db=db, task_id=task_id)
+    task.task_ans = task_ans
+    db.add(task)
+    db.commit()
+    db.refresh(task)
+
+
+def update_task_answer_in_db(db: Session, task_id: int, task_ans: dict):
+    task = get_task_from_db(db=db, task_id=task_id)
+    task.task_ans = task_ans
+    db.add(task)
+    db.commit()
+    db.refresh(task)
