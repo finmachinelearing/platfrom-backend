@@ -124,9 +124,10 @@ async def get_all_answers_for_task(
     result = []
 
     for answer in answers:
-        score, user_id, surname = answer
+        score, user_id, name, surname = answer
         result.append({
             'user_id': user_id,
+            'name': name,
             'surname': surname,
             'score': score
         })
