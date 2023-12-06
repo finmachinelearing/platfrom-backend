@@ -147,3 +147,68 @@ class MAE(Metric):
 
     def calc(self) -> float:
         return 1 / len(self.y_real) * sum(abs(self.y_real - self.y_predicted))
+
+
+class Accuracy(Metric):
+
+    def __init__(self, y_real: List, y_predicted: List) -> None:
+        super.__init__(y_real, y_predicted)
+
+    def calc(self) -> float:
+        return np.sum(np.equal(self.y_real, self.y_predicted)) / len(self.y_real)
+
+
+class Precision(Metric):
+
+    def __init__(self, y_real: List, y_predicted: List) -> None:
+        super.__init__(y_real, y_predicted)
+
+    def calc(self) -> float:
+        true_positives = sum(1 for a, p in zip(self.y_real, self.y_predicted) if a == 1 and p == 1)
+        false_positives = sum(1 for a, p in zip(self.y_real, self.y_predicted) if a == 0 and p == 1)
+
+        if true_positives + false_positives == 0:
+            return 0.0
+
+        precision = true_positives / (true_positives + false_positives)
+
+        return precision
+
+
+class Recall(Metric):
+
+    def __init__(self, y_real: List, y_predicted: List) -> None:
+        super().__init__(y_real, y_predicted)
+
+    def calc(self) -> float:
+        true_positives = sum(1 for a, p in zip(self.y_real, self.y_predicted) if a == 1 and p == 1)
+        false_negatives = sum(1 for a, p in zip(self.y_real, self.y_predicted) if a == 1 and p == 0)
+
+        if true_positives + false_negatives == 0:
+            return 0.0
+
+        recall = true_positives / (true_positives + false_negatives)
+
+        return recall
+
+
+class F1Score(Metric):
+
+    def __init__(self, y_real: List, y_predicted: List) -> None:
+        super().__init__(y_real, y_predicted)
+
+    def calc(self) -> float:
+        true_positives = sum(1 for a, p in zip(self.y_real, self.y_predicted) if a == 1 and p == 1)
+        false_positives = sum(1 for a, p in zip(self.y_real, self.y_predicted) if a == 0 and p == 1)
+        false_negatives = sum(1 for a, p in zip(self.y_real, self.y_predicted) if a == 1 and p == 0)
+
+        if true_positives + false_positives == 0 or true_positives + false_negatives == 0:
+            return 0.0
+
+        precision = true_positives / (true_positives + false_positives)
+
+        recall = true_positives / (true_positives + false_negatives)
+
+        f1_score = 2 * (precision * recall) / (precision + recall)
+
+        return f1_score

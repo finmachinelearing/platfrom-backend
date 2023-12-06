@@ -18,7 +18,11 @@ from app.app.utils import (
     check_csv_records,
     MAE,
     MAPE,
-    MSE
+    MSE,
+    Accuracy,
+    Precision,
+    Recall,
+    F1Score
 )
 from app.app.crud import (
     create_answer_in_db,
@@ -58,6 +62,16 @@ def calculate_score(db: Session, answer: Answer, task_id: int) -> None:
         function = MAPE(y_real=correct_answers, y_predicted=user_answers)
     elif function_name == 'MAE':
         function = MAE(y_real=correct_answers, y_predicted=user_answers)
+    elif function_name == 'Accuracy':
+        function = Accuracy(y_real=correct_answers, y_predicted=user_answers)
+    elif function_name == 'Precision':
+        function = Precision(y_real=correct_answers, y_predicted=user_answers)
+    elif function_name == 'Recall':
+        function = Recall(y_real=correct_answers, y_predicted=user_answers)
+    elif function_name == 'F1Score':
+        function_name == F1Score(y_real=correct_answers, y_predicted=user_answers)
+    else:
+        raise ValueError('Metric name is not found')
 
     score = function.calc()
 
