@@ -34,7 +34,7 @@ class EditUser(BaseModel):
 
 
 class Function(BaseModel):
-
+    id: int
     name: str
 
 
