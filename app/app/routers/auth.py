@@ -78,10 +78,15 @@ async def google_sso_callback(request: Request, db: Session = Depends(get_db)):
             )
         )
 
+    content = {
+        'access_token': create_access_token(db_user)
+    }
+
+    if db_user.is_superuser:
+        content['is_superuser'] = True
+
     response = JSONResponse(
-        content={
-            'access_token': create_access_token(db_user)
-        },
+        content=content,
         status_code=200
     )
 

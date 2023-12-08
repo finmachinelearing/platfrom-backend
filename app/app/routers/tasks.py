@@ -40,6 +40,7 @@ router = APIRouter(
 @router.get('/search', response_model=list[ReturnTask])
 async def search_tasks(
         db: Session = Depends(get_db),
+        s3: Session = Depends(get_s3),
         name: Optional[str] = None,
         end_date: Optional[str] = None,
         tag: Optional[str] = None
@@ -50,6 +51,20 @@ async def search_tasks(
         end_date=end_date,
         tag=tag
     )
+
+    for task in tasks:
+        task_data = task.task_data
+
+        if task_data:
+            task.task_data = s3.generate_presigned_url(
+                'get_object',
+                Params={
+                    'Bucket': S3_BUCKET_NAME,
+                    'Key': task_data
+                },
+                ExpiresIn=1800
+            )
+
     return tasks
 
 
@@ -144,12 +159,25 @@ async def add_task_answer(
 @router.get('/{task_id}', response_model=ReturnTask)
 async def get_task(
         task_id: int,
-        db: Session = Depends(get_db)
+        db: Session = Depends(get_db),
+        s3: Session = Depends(get_s3)
 ):
     task = get_task_from_db(db=db, task_id=task_id)
 
     if not task:
         raise HTTPException(detail='Not found', status_code=404)
+
+    task_data = task.task_data
+
+    if task_data:
+        task.task_data = s3.generate_presigned_url(
+            'get_object',
+            Params={
+                'Bucket': S3_BUCKET_NAME,
+                'Key': task_data
+            },
+            ExpiresIn=1800
+        )
 
     return task
 
@@ -230,7 +258,8 @@ async def update_task_answer(
 @router.get('/participant/{user_id}', response_model=list[ReturnTask])
 async def get_all_tasks_for_user(
         user_id: int,
-        db: Session = Depends(get_db)
+        db: Session = Depends(get_db),
+        s3: Session = Depends(get_s3)
 ):
     user = get_user_by_id(db=db, user_id=user_id)
 
@@ -238,5 +267,18 @@ async def get_all_tasks_for_user(
         raise HTTPException(detail='User not found', status_code=404)
 
     tasks = get_all_tasks_for_user_id_db(db=db, user_id=user_id)
+
+    for task in tasks:
+        task_data = task.task_data
+
+        if task_data:
+            task.task_data = s3.generate_presigned_url(
+                'get_object',
+                Params={
+                    'Bucket': S3_BUCKET_NAME,
+                    'Key': task_data
+                },
+                ExpiresIn=1800
+            )
 
     return tasks
