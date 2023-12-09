@@ -226,3 +226,19 @@ def update_task_answer_in_db(db: Session, task_id: int, task_ans: dict):
     db.add(task)
     db.commit()
     db.refresh(task)
+
+
+def add_test_data_in_db(db: Session, task_id: int, uid: str):
+    task = get_task_from_db(db=db, task_id=task_id)
+    task.test_data = uid
+    db.add(task)
+    db.commit()
+    db.refresh(task)
+
+
+def update_test_data_in_db(db: Session, task_id: int, uid: str):
+    task = get_task_from_db(db=db, task_id=task_id)
+    task.test_data = uid
+    db.add(task)
+    db.commit()
+    db.refresh(task)

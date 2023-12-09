@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Optional, Dict, List
+from typing import Optional, List
 from pydantic import BaseModel
 
 
@@ -34,6 +34,7 @@ class EditUser(BaseModel):
 
 
 class Function(BaseModel):
+
     id: int
     name: str
 
@@ -73,6 +74,7 @@ class ReturnTask(BaseModel):
     end_date: datetime
     function_id: int
     task_data: Optional[str]
+    test_data: Optional[str]
     ans_type: str
     tags: Optional[List[str]]
     is_active: bool

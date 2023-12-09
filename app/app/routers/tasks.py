@@ -27,7 +27,9 @@ from app.app.crud import (
     get_user_by_id,
     get_all_tasks_for_user_id_db,
     add_task_answer_in_db,
-    update_task_answer_in_db
+    update_task_answer_in_db,
+    add_test_data_in_db,
+    update_test_data_in_db
 )
 from app.app.config import S3_BUCKET_NAME
 
@@ -54,6 +56,7 @@ async def search_tasks(
 
     for task in tasks:
         task_data = task.task_data
+        test_data = task.test_data
 
         if task_data:
             task.task_data = s3.generate_presigned_url(
@@ -61,6 +64,16 @@ async def search_tasks(
                 Params={
                     'Bucket': S3_BUCKET_NAME,
                     'Key': task_data
+                },
+                ExpiresIn=1800
+            )
+
+        if test_data:
+            task.test_data = s3.generate_presigned_url(
+                'get_object',
+                Params={
+                    'Bucket': S3_BUCKET_NAME,
+                    'Key': test_data
                 },
                 ExpiresIn=1800
             )
@@ -128,6 +141,27 @@ async def add_task_data(
         file.file.close()
 
 
+@router.post('/{task_id}/add_test_data')
+async def add_test_data(
+        file: UploadFile,
+        task_id: int,
+        db: Session = Depends(get_db),
+        s3: Session = Depends(get_s3),
+        _: bool = Depends(get_superadmin_or_404),
+):
+    try:
+        file.file.read()
+        file.file.seek(0)
+        uid = str(uuid.uuid4())
+        s3.upload_fileobj(file.file, S3_BUCKET_NAME, uid)
+        add_test_data_in_db(db=db, task_id=task_id, uid=uid)
+        return JSONResponse(content={'result': 'OK'}, status_code=201)
+    except Exception:
+        raise HTTPException(status_code=500, detail='Error on uploading the file')
+    finally:
+        file.file.close()
+
+
 @router.post('/{task_id}/add_answer')
 async def add_task_answer(
         file: UploadFile,
@@ -168,6 +202,7 @@ async def get_task(
         raise HTTPException(detail='Not found', status_code=404)
 
     task_data = task.task_data
+    test_data = task.test_data
 
     if task_data:
         task.task_data = s3.generate_presigned_url(
@@ -175,6 +210,16 @@ async def get_task(
             Params={
                 'Bucket': S3_BUCKET_NAME,
                 'Key': task_data
+            },
+            ExpiresIn=1800
+        )
+
+    if test_data:
+        task.test_data = s3.generate_presigned_url(
+            'get_object',
+            Params={
+                'Bucket': S3_BUCKET_NAME,
+                'Key': test_data
             },
             ExpiresIn=1800
         )
@@ -227,6 +272,27 @@ async def update_task_data(
         file.file.close()
 
 
+@router.patch('/{task_id}/update_test_data')
+async def update_test_data(
+        task_id: int,
+        file: UploadFile,
+        db: Session = Depends(get_db),
+        s3: Session = Depends(get_s3),
+        _: bool = Depends(get_superadmin_or_404),
+):
+    try:
+        file.file.read()
+        file.file.seek(0)
+        uid = str(uuid.uuid4())
+        s3.upload_fileobj(file.file, S3_BUCKET_NAME, uid)
+        update_test_data_in_db(db=db, task_id=task_id, uid=uid)
+        return JSONResponse(content='Updated', status_code=200)
+    except Exception:
+        raise HTTPException(status_code=500, detail='Error on uploading the file')
+    finally:
+        file.file.close()
+
+
 @router.patch('/{task_id}/update_answer')
 async def update_task_answer(
         file: UploadFile,
@@ -270,6 +336,7 @@ async def get_all_tasks_for_user(
 
     for task in tasks:
         task_data = task.task_data
+        test_data = task.test_data
 
         if task_data:
             task.task_data = s3.generate_presigned_url(
@@ -277,6 +344,16 @@ async def get_all_tasks_for_user(
                 Params={
                     'Bucket': S3_BUCKET_NAME,
                     'Key': task_data
+                },
+                ExpiresIn=1800
+            )
+
+        if test_data:
+            task.test_data = s3.generate_presigned_url(
+                'get_object',
+                Params={
+                    'Bucket': S3_BUCKET_NAME,
+                    'Key': test_data
                 },
                 ExpiresIn=1800
             )

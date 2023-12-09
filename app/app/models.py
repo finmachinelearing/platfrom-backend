@@ -55,6 +55,7 @@ class Task(Base):
     end_date = Column(DateTime)
     function_id = Column(Integer, ForeignKey('function.id'))
     task_data = Column(String, nullable=True, default=None)
+    test_data = Column(String, nullable=True, default=None)
     task_ans = Column(JSON)
     ans_type = Column(String)
     tags = Column(ARRAY(String))
